@@ -30,7 +30,7 @@ const MONTHS = [
   { m: 'M16', label: '9',                 days: 30 },  // 2027-09
   { m: 'M17', label: '10',                days: 31 },  // 2027-10
   { m: 'M18', label: '11',                days: 30 },  // 2027-11
-  { m: 'M19', label: '12',                days: 31 },  // 2027-12
+  { m: 'M19', label: '12', year: "'27.12", days: 31 },  // 2027-12
 ];
 const TOTAL_MONTHS = 20;
 
@@ -66,6 +66,7 @@ const MILESTONES = [
 const TASKS = [
   {
     id: 'core', group: '코어뱅킹 #2 클라우드 전환', short: '코어뱅킹 #2',
+    badges: ['기업여신심사', '여신담보', '사후관리', '기업워크아웃', '기업신용평가', '고객전략관리'],
     rows: [
       { id: 'core-1', name: '코어뱅킹 #2 클라우드 전환', phases: [
         ph('사전준비','사전준비',0,1),

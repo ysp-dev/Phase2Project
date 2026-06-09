@@ -9,6 +9,25 @@
   function div(cls) { return el('div', cls); }
   function span(cls) { return el('span', cls); }
 
+  // 과제 하위 뱃지 색상 — 과제 좌측 컬러바와 동일한 KB 액센트 6색
+  const BADGE_COLORS = ['#FFBC00', '#F46600', '#4D9FFF', '#00C896', '#FF5C8D', '#A78BFA'];
+  // '#RRGGBB' + alpha → rgba()
+  function hexA(hex, a) {
+    const n = parseInt(hex.slice(1), 16);
+    return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
+  }
+
+  // 월 내 균등 주간 눈금 위치(0~1) 목록.
+  // 위치는 균등 분할하되 개수만 일수에 따라 차등 →
+  //  · 28일(2월) = 4주 → 눈금 3개 (1/4,2/4,3/4)
+  //  · 30·31일    = 5주 → 눈금 4개 (1/5…4/5)
+  function weekTickFractions(days) {
+    const segments = Math.ceil(days / 7); // 주(週) 개수
+    const out = [];
+    for (let k = 1; k < segments; k++) out.push(k / segments);
+    return out;
+  }
+
   // ── Grid lines ───────────────────────────────────────────────────────────────
   function buildGrid() {
     const wrap = div('g-grid');
@@ -16,10 +35,10 @@
       const line = div(mo.year ? 'g-gridline g-gridline--year' : 'g-gridline');
       line.style.left = pct(i);
       wrap.appendChild(line);
-      // week sub-gridlines at 7/14/21 days within each month (actual calendar)
-      [7, 14, 21].forEach(d => {
+      // week sub-gridlines — 균등 주간 눈금(일수에 따라 개수만 차등)
+      weekTickFractions(mo.days).forEach(frac => {
         const wl = div('g-gridline g-gridline--week');
-        wl.style.left = pct(i + d / mo.days);
+        wl.style.left = pct(i + frac);
         wrap.appendChild(wl);
       });
     });
@@ -40,15 +59,16 @@
     return d;
   }
 
-  // ── KB 5-color palette for summary row ──────────────────────────────────────
+  // ── 요약(전체 단계) 행 전용 옐로우톤 팔레트 ───────────────────────────────────
+  // 단계가 진행될수록 밝은 노랑 → 짙은 골드/앰버로 짙어지는 단색 그라데이션
   const SUMMARY_COLORS = {
-    '사전준비': { color: '#60584D', text: '#E0D8D0' }, // Feedback (dark brown)
-    '분석':     { color: '#FFD337', text: '#3A2E00' }, // Positive (yellow)
-    '설계':     { color: '#0066FF', text: '#FFFFFF' }, // Success (blue)
-    '개발':     { color: '#FF0000', text: '#FFFFFF' }, // Negative (red)
-    '테스트':   { color: '#F46600', text: '#FFFFFF' }, // Notification (orange)
-    '이행':     { color: '#60584D', text: '#E0D8D0' }, // Feedback (dark brown)
-    '안정화':   { color: '#3A3840', text: '#A0A0B0' }, // muted dark
+    '사전준비': { color: '#FFF1B8', text: '#5A4A00' }, // 연노랑
+    '분석':     { color: '#FFDD33', text: '#3A2E00' }, // 노랑
+    '설계':     { color: '#FFC107', text: '#3A2A00' }, // 진노랑
+    '개발':     { color: '#F5A300', text: '#3A2600' }, // 앰버
+    '테스트':   { color: '#E08700', text: '#FFFFFF' }, // 골드
+    '이행':     { color: '#C77400', text: '#FFFFFF' }, // 진골드
+    '안정화':   { color: '#9E5E00', text: '#FFE6B0' }, // 다크앰버
   };
 
   function buildSummaryBar(phase) {
@@ -117,11 +137,11 @@
       cell.appendChild(mLabel);
       cell.appendChild(numLabel);
 
-      // week tick marks at 7/14/21 days within each month cell (actual calendar)
+      // week tick marks — 균등 주간 눈금(일수에 따라 개수만 차등)
       const weekWrap = div('g-week-ticks');
-      [7, 14, 21].forEach(d => {
+      weekTickFractions(mo.days).forEach(frac => {
         const tick = div('g-week-tick');
-        tick.style.left = (d / mo.days * 100) + '%';
+        tick.style.left = (frac * 100) + '%';
         weekWrap.appendChild(tick);
       });
       cell.appendChild(weekWrap);
@@ -179,7 +199,22 @@
     const lc = div('g-label-col');
     if (taskGroup.rows.length === 1) {
       const lbl = div('g-label g-label--full');
-      lbl.textContent = taskGroup.group;
+      const name = span('g-label-name');
+      name.textContent = taskGroup.group;
+      lbl.appendChild(name);
+      if (taskGroup.badges && taskGroup.badges.length) {
+        const badges = div('g-label-badges');
+        taskGroup.badges.forEach((t, bi) => {
+          const c = BADGE_COLORS[bi % BADGE_COLORS.length];
+          const badge = span('g-label-badge');
+          badge.textContent = t;
+          badge.style.color       = c;
+          badge.style.background   = hexA(c, 0.14);
+          badge.style.borderColor  = hexA(c, 0.42);
+          badges.appendChild(badge);
+        });
+        lbl.appendChild(badges);
+      }
       lc.appendChild(lbl);
     } else {
       const grp = div('g-label g-label--group');
@@ -222,6 +257,35 @@
     return wrap;
   }
 
+  // ── 막대 라벨 자동 축소 ────────────────────────────────────────────────────────
+  // 막대 폭보다 단계명이 길면 잘림(…) 대신 폰트를 줄여 한 줄로 맞춤
+  const LABEL_BASE = 14, LABEL_MIN = 8;
+  function fitBarLabels(container) {
+    // 컨테이너가 아직 화면에 없으면(폭 0) 측정 불가 → 다음 기회에
+    if (!container || container.clientWidth === 0) return;
+    container.querySelectorAll('.g-bar-label').forEach(lbl => {
+      let fs = LABEL_BASE;
+      lbl.style.fontSize = fs + 'px';
+      // 내용(scrollWidth)이 막대 안쪽(clientWidth)보다 넓으면 폰트 축소
+      while (lbl.scrollWidth > lbl.clientWidth + 0.5 && fs > LABEL_MIN) {
+        fs -= 0.5;
+        lbl.style.fontSize = fs + 'px';
+      }
+    });
+  }
+
+  // 컨테이너 크기가 잡히거나 바뀔 때마다(숨김→표시, 창 리사이즈 포함) 재맞춤
+  let _ro = null;
+  function observeFit(container) {
+    if (typeof ResizeObserver === 'undefined') {
+      requestAnimationFrame(() => fitBarLabels(container));
+      return;
+    }
+    if (_ro) _ro.disconnect();
+    _ro = new ResizeObserver(() => fitBarLabels(container));
+    _ro.observe(container);
+  }
+
   // ── Main render ───────────────────────────────────────────────────────────────
   function renderGantt(container) {
     container.innerHTML = '';
@@ -229,8 +293,8 @@
 
     const chart = div('g-chart');
     chart.appendChild(buildMonthHeader());
-    chart.appendChild(buildSummaryRow());
     chart.appendChild(buildMilestoneRow());
+    chart.appendChild(buildSummaryRow());
 
     let rowIndex = 0;
     P().TASKS.forEach(group => {
@@ -244,6 +308,10 @@
     const note = div('g-note');
     note.textContent = '주) 전체 일정·주요 마일스톤 시기는 추후 협의하에 변경될 수 있음';
     container.appendChild(note);
+
+    // 막대 라벨 폭 맞춤: 즉시 + 컨테이너 크기 변화(표시/리사이즈) 감시
+    requestAnimationFrame(() => fitBarLabels(container));
+    observeFit(container);
   }
 
   window.renderGantt = renderGantt;

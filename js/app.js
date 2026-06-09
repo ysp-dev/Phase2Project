@@ -49,9 +49,20 @@
   // ── Render ────────────────────────────────────────────────────────────────────
   function renderHeader() {
     const M = window.PROJECT_DATA.META;
-    document.getElementById('brand-title').textContent = M.title;
+    const titleEl = document.getElementById('brand-title');
+    const DEPT = '여신IT개발부';
+    if (M.title.startsWith(DEPT)) {
+      // '여신IT개발부'만 색상 차별화
+      titleEl.innerHTML = '';
+      const dept = document.createElement('span');
+      dept.className = 'brand-dept';
+      dept.textContent = DEPT;
+      titleEl.appendChild(dept);
+      titleEl.appendChild(document.createTextNode(M.title.slice(DEPT.length)));
+    } else {
+      titleEl.textContent = M.title;
+    }
     document.getElementById('brand-sub').textContent   = M.subtitle + ' · ' + M.period;
-    document.getElementById('today-label').textContent = '기준일 ' + M.todayLabel;
     const badge = document.getElementById('items-count-badge');
     if (badge) badge.textContent = state.items.length;
   }
