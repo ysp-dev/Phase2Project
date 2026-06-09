@@ -1,11 +1,25 @@
 'use strict';
 
+// ─── 기준일(오늘) — 한국 시간(KST, Asia/Seoul) 기준으로 동적 산출 ───────────────
+// 실행 환경의 시간대와 무관하게 항상 한국 날짜를 사용한다.
+function kstToday() {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date());
+  const get = t => +parts.find(p => p.type === t).value;
+  return { y: get('year'), m: get('month'), d: get('day') };
+}
+const TODAY_KST   = kstToday();
+const TODAY_LABEL = TODAY_KST.y + '.' +
+  String(TODAY_KST.m).padStart(2, '0') + '.' +
+  String(TODAY_KST.d).padStart(2, '0');
+
 // ─── 프로젝트 메타 ───────────────────────────────────────────────────────────
 const PROJECT_META = {
   title:       '여신IT개발부 코어뱅킹 현대화 2단계 프로젝트',
   subtitle:    '통합 진행 현황 대시보드',
   period:      "'26.5 ~ '27.12 (20개월)",
-  todayLabel:  '2026.06.09',
+  todayLabel:  TODAY_LABEL,
   brand:       'KB',
 };
 
@@ -34,8 +48,14 @@ const MONTHS = [
 ];
 const TOTAL_MONTHS = 20;
 
-// 오늘 기준선: 2026-06-09 → M1(6월) + 9/30
-const TODAY_INDEX = 1 + 9 / 30; // ≈ 1.3
+// 오늘 기준선: KST 오늘 → 타임라인 위치(개월 분수). M0 = 2026-05 기준.
+// 프로젝트 기간(0 ~ TOTAL_MONTHS) 밖이면 가장자리로 클램프.
+const TODAY_INDEX = (() => {
+  const monthIdx   = (TODAY_KST.y - 2026) * 12 + (TODAY_KST.m - 5);
+  const daysInMon  = new Date(TODAY_KST.y, TODAY_KST.m, 0).getDate();
+  const idx        = monthIdx + TODAY_KST.d / daysInMon;
+  return Math.max(0, Math.min(TOTAL_MONTHS, idx));
+})();
 
 // ─── 단계 유형 ──────────────────────────────────────────────────────────────
 const PHASE_TYPES = {

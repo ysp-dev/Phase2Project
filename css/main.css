@@ -95,10 +95,10 @@ input, select, textarea { font-family: inherit; }
   display: flex; align-items: baseline; gap: 10px;
   flex-wrap: nowrap; min-width: 0; overflow: hidden;
 }
-.brand-title { font-size: 21px; font-weight: 800; letter-spacing: -.4px; color: #F0F0F0; white-space: nowrap; }
+.brand-title { font-size: 34px; font-weight: 800; letter-spacing: -.4px; color: #F0F0F0; white-space: nowrap; }
 .brand-dept  { color: var(--kb-yellow); }
-.brand-sep   { font-size: 15px; color: var(--kb-disabled); flex-shrink: 0; }
-.brand-sub   { font-size: 14px; color: var(--kb-caption); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-sep   { font-size: 24px; color: var(--kb-disabled); flex-shrink: 0; }
+.brand-sub   { font-size: 22px; color: var(--kb-caption); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .header-meta { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
 
 .today-badge {
@@ -152,15 +152,15 @@ input, select, textarea { font-family: inherit; }
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 14px; margin-bottom: 30px;
+  gap: 12px; margin-bottom: 18px;
 }
 .stat-card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--r-lg); padding: 20px 22px;
-  display: flex; flex-direction: row; align-items: baseline; gap: 10px;
+  border-radius: var(--r-md); padding: 9px 18px;
+  display: flex; flex-direction: row; align-items: baseline; gap: 9px;
   box-shadow: var(--shadow-sm);
 }
-.stat-card-value  { font-size: 38px; font-weight: 800; line-height: 1; letter-spacing: -1.5px; flex-shrink: 0; }
+.stat-card-value  { font-size: 26px; font-weight: 800; line-height: 1; letter-spacing: -1px; flex-shrink: 0; }
 .stat-card-label  { font-size: 14px; font-weight: 600; color: var(--kb-caption); white-space: nowrap; }
 .stat-card-detail { font-size: 12px; color: var(--kb-disabled); }
 
@@ -720,9 +720,12 @@ input, select, textarea { font-family: inherit; }
   .form-grid-2 { grid-template-columns: 1fr; }
   .dashboard-grid { grid-template-columns: repeat(3, 1fr); }
   .progress-label { min-width: 130px; }
+  /* 간트: 좁은 화면에선 압축 대신 가로 스크롤로 가독성 유지 */
+  #gantt-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .g-chart { min-width: 820px; }
 }
 @media (max-width: 600px) {
-  .brand-title      { font-size: 20px; }
+  .brand-title      { font-size: 32px; }
   .tab-btn          { font-size: 15px; padding: 12px 5px; }
   .items-table-wrap { overflow-x: auto; }
   .items-cards      { grid-template-columns: 1fr; }

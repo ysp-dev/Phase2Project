@@ -25,7 +25,7 @@
 
     <!-- Tab nav -->
     <nav class="tab-nav" role="tablist">
-      <button class="tab-btn" data-tab="dashboard" role="tab" aria-selected="true">
+      <button class="tab-btn" data-tab="dashboard" id="tab-dashboard" role="tab" aria-selected="true" aria-controls="panel-dashboard">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" aria-hidden="true">
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
@@ -33,7 +33,7 @@
         </svg>
         대시보드
       </button>
-      <button class="tab-btn" data-tab="gantt" role="tab" aria-selected="false">
+      <button class="tab-btn" data-tab="gantt" id="tab-gantt" role="tab" aria-selected="false" aria-controls="panel-gantt">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" aria-hidden="true">
           <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
@@ -43,7 +43,7 @@
         </svg>
         간트차트
       </button>
-      <button class="tab-btn" data-tab="items" role="tab" aria-selected="false">
+      <button class="tab-btn" data-tab="items" id="tab-items" role="tab" aria-selected="false" aria-controls="panel-items">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="12" cy="12" r="10"/>
@@ -60,15 +60,15 @@
   <main class="app-main" id="app-main">
 
     <!-- Dashboard panel -->
-    <div class="tab-panel" id="panel-dashboard" role="tabpanel"></div>
+    <div class="tab-panel" id="panel-dashboard" role="tabpanel" aria-labelledby="tab-dashboard" hidden></div>
 
     <!-- Gantt panel -->
-    <div class="tab-panel" id="panel-gantt" role="tabpanel">
+    <div class="tab-panel" id="panel-gantt" role="tabpanel" aria-labelledby="tab-gantt" hidden>
       <div id="gantt-container"></div>
     </div>
 
     <!-- Items panel -->
-    <div class="tab-panel" id="panel-items" role="tabpanel"></div>
+    <div class="tab-panel" id="panel-items" role="tabpanel" aria-labelledby="tab-items" hidden></div>
 
   </main>
 

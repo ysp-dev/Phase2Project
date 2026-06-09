@@ -373,6 +373,7 @@
     const mClose  = btn('modal-close');
     mClose.innerHTML = '&times;';
     mClose.setAttribute('aria-label', '닫기');
+    mClose.addEventListener('click', closeModal);
     mHeader.appendChild(mTitle);
     mHeader.appendChild(mClose);
     dialog.appendChild(mHeader);
@@ -489,7 +490,10 @@
   }
 
   function handleSave(form) {
-    const today = new Date().toISOString().slice(0, 10);
+    // 저장 시각은 한국 시간(KST) 기준 날짜 — UTC(toISOString)는 밤 시간대에 하루 어긋남
+    const today = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).format(new Date()); // 'YYYY-MM-DD'
     if (form._isNew) {
       _onAdd({ ...form, id: 'it-' + Date.now(), updatedAt: today });
     } else {
@@ -532,10 +536,10 @@
     });
     container.appendChild(grid);
 
-    // Phase progress (today_index / total)
+    // 과제별 주요사항 처리율 (완료 / 전체) — 일정 진척률이 아님에 주의
     const progress = div('dashboard-section');
     const progTitle = div('section-title');
-    progTitle.textContent = '과제별 현황';
+    progTitle.textContent = '과제별 주요사항 처리율';
     progress.appendChild(progTitle);
     const progList = div('progress-list');
     P().TASKS.forEach(task => {

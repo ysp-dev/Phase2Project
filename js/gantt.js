@@ -17,6 +17,14 @@
     return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
   }
 
+  // 'YYYY.MM.DD' → '(요일)' 한글 요일 라벨
+  const KO_DAYS = ['일', '월', '화', '수', '목', '금', '토'];
+  function koWeekday(label) {
+    const [y, m, d] = label.split('.').map(Number);
+    if (!y || !m || !d) return '';
+    return '(' + KO_DAYS[new Date(y, m - 1, d).getDay()] + ')';
+  }
+
   // 월 내 균등 주간 눈금 위치(0~1) 목록.
   // 위치는 균등 분할하되 개수만 일수에 따라 차등 →
   //  · 28일(2월) = 4주 → 눈금 3개 (1/4,2/4,3/4)
@@ -250,7 +258,7 @@
     const todayItem = div('g-legend-today');
     const line = span('g-legend-today-line');
     const lbl = span('g-legend-label');
-    lbl.textContent = '기준일 ' + P().META.todayLabel;
+    lbl.textContent = '기준일 ' + P().META.todayLabel + ' ' + koWeekday(P().META.todayLabel);
     todayItem.appendChild(line);
     todayItem.appendChild(lbl);
     wrap.appendChild(todayItem);
