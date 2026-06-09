@@ -7,7 +7,7 @@
 
   // ── State ────────────────────────────────────────────────────────────────────
   const state = {
-    tab:     'dashboard',
+    tab:     'gantt',
     items:   [],
     layout:  'side',
     fTask:   '전체',
@@ -57,7 +57,7 @@
       const raw = localStorage.getItem(LS_PREFS);
       if (raw) {
         const p = JSON.parse(raw);
-        if (p.tab)    state.tab    = p.tab;
+        // 탭은 복원하지 않음 — 앱은 항상 간트차트(최초 화면)로 시작
         if (p.layout) state.layout = p.layout;
       }
     } catch (e) {}
