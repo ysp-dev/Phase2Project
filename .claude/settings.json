@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /Users/ys_dev/Documents/Phase2Project/assets && cp \"/Users/ys_dev/.claude/projects/-Users-ys-dev-Documents-Phase2Project/1ceb5abf-c2ec-4da3-8ddb-c9497c2a3634/tool-results/webfetch-1781006688263-d1ir4y.jpg\" /Users/ys_dev/Documents/Phase2Project/assets/kb-symbol.jpg)",
+      "Bash(ls /Users/ys_dev/Documents/GitHub/)",
+      "Read(//Users/ys_dev/Documents/GitHub/**)",
+      "Bash(mv /Users/ys_dev/Documents/Phase2Project /Users/ys_dev/Documents/GitHub/Phase2Project && echo \"완료\" && ls /Users/ys_dev/Documents/GitHub/)"
+    ],
+    "additionalDirectories": [
+      "/Users/ys_dev/.claude/projects/-Users-ys-dev-Documents-Phase2Project/1ceb5abf-c2ec-4da3-8ddb-c9497c2a3634/tool-results",
+      "/Users/ys_dev/Documents/GitHub"
+    ]
+  }
+}

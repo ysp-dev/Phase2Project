@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>여신IT개발부 코어뱅킹 현대화 2단계 프로젝트 대시보드</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+  <!-- ══ App Header ══════════════════════════════════════════════════════════ -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="header-brand">
+        <div class="brand-logo">KB</div>
+        <div class="brand-text">
+          <h1 class="brand-title" id="brand-title">여신IT개발부 코어뱅킹 현대화 2단계 프로젝트</h1>
+          <span class="brand-sep">·</span>
+          <span class="brand-sub" id="brand-sub"></span>
+        </div>
+      </div>
+      <div class="header-meta">
+        <div class="today-badge">
+          <span class="today-dot"></span>
+          <span class="today-label" id="today-label"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab nav -->
+    <nav class="tab-nav" role="tablist">
+      <button class="tab-btn" data-tab="dashboard" role="tab" aria-selected="true">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+        대시보드
+      </button>
+      <button class="tab-btn" data-tab="gantt" role="tab" aria-selected="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+        간트차트
+      </button>
+      <button class="tab-btn" data-tab="items" role="tab" aria-selected="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        주요사항 관리
+        <span class="tab-badge" id="items-count-badge">0</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- ══ Main content ══════════════════════════════════════════════════════════ -->
+  <main class="app-main" id="app-main">
+
+    <!-- Dashboard panel -->
+    <div class="tab-panel" id="panel-dashboard" role="tabpanel"></div>
+
+    <!-- Gantt panel -->
+    <div class="tab-panel" id="panel-gantt" role="tabpanel">
+      <div id="gantt-container"></div>
+    </div>
+
+    <!-- Items panel -->
+    <div class="tab-panel" id="panel-items" role="tabpanel"></div>
+
+  </main>
+
+  <!-- ══ Modal (items form) ════════════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="modal-overlay" aria-live="polite"></div>
+
+  <!-- ══ Scripts ══════════════════════════════════════════════════════════════ -->
+  <script src="js/data.js"></script>
+  <script src="js/gantt.js"></script>
+  <script src="js/items.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
