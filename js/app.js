@@ -15,6 +15,8 @@
     fStatus: '전체',
     query:   '',
   };
+  let temporalTimer = null;
+  let ganttNeedsRefresh = false;
 
   // ── Persistence ───────────────────────────────────────────────────────────────
   function seedCopy() {
@@ -117,6 +119,15 @@
       `</div>`;
   }
 
+  function renderGanttTab(force) {
+    const container = document.getElementById('gantt-container');
+    if (!container) return;
+    if (force || ganttNeedsRefresh || !container.hasChildNodes()) {
+      renderGantt(container);
+      ganttNeedsRefresh = false;
+    }
+  }
+
   function renderTab() {
     // 패널: active 클래스 + hidden 속성 동기화
     document.querySelectorAll('.tab-panel').forEach(p => {
@@ -135,8 +146,7 @@
     if (state.tab === 'dashboard') {
       renderDashboard(document.getElementById('panel-dashboard'), state.items);
     } else if (state.tab === 'gantt') {
-      const container = document.getElementById('gantt-container');
-      if (container && !container.hasChildNodes()) renderGantt(container);
+      renderGanttTab(false);
     } else if (state.tab === 'items') {
       renderItemsTab();
     }
@@ -177,6 +187,37 @@
     state.items = state.items.filter(x => x.id !== id);
     saveItems();
     renderTab();
+  }
+
+  // ── 기준일/시각 자동 갱신 ───────────────────────────────────────────────────
+  function refreshTemporalState() {
+    if (window.PROJECT_DATA && typeof window.PROJECT_DATA.refreshToday === 'function') {
+      window.PROJECT_DATA.refreshToday();
+    }
+
+    // 기준일 라벨의 시각은 분 단위라, 보이지 않는 동안에도 다음 간트 진입 시 새로 그린다.
+    ganttNeedsRefresh = true;
+    renderHeader();
+    if (state.tab === 'gantt') renderGanttTab(true);
+  }
+
+  function scheduleTemporalRefresh() {
+    const now = new Date();
+    const delay = 60000 - (now.getSeconds() * 1000 + now.getMilliseconds()) + 50;
+    temporalTimer = setTimeout(() => {
+      refreshTemporalState();
+      scheduleTemporalRefresh();
+    }, Math.max(1000, delay));
+  }
+
+  function startTemporalRefresh() {
+    if (temporalTimer) return;
+    scheduleTemporalRefresh();
+    window.addEventListener('focus', refreshTemporalState);
+    window.addEventListener('pageshow', refreshTemporalState);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) refreshTemporalState();
+    });
   }
 
   // ── Events ────────────────────────────────────────────────────────────────────
@@ -222,6 +263,7 @@
     loadPrefs();
     bindEvents();
     renderTab();
+    startTemporalRefresh();
   }
 
   if (document.readyState === 'loading') {

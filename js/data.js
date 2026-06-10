@@ -2,17 +2,22 @@
 
 // ─── 기준일(오늘) — 한국 시간(KST, Asia/Seoul) 기준으로 동적 산출 ───────────────
 // 실행 환경의 시간대와 무관하게 항상 한국 날짜를 사용한다.
-function kstToday() {
+function kstToday(date) {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
-  }).formatToParts(new Date());
+  }).formatToParts(date || new Date());
   const get = t => +parts.find(p => p.type === t).value;
   return { y: get('year'), m: get('month'), d: get('day') };
 }
+
+function kstLabel(kst) {
+  return kst.y + '.' +
+    String(kst.m).padStart(2, '0') + '.' +
+    String(kst.d).padStart(2, '0');
+}
+
 const TODAY_KST   = kstToday();
-const TODAY_LABEL = TODAY_KST.y + '.' +
-  String(TODAY_KST.m).padStart(2, '0') + '.' +
-  String(TODAY_KST.d).padStart(2, '0');
+const TODAY_LABEL = kstLabel(TODAY_KST);
 
 // ─── 프로젝트 메타 ───────────────────────────────────────────────────────────
 const PROJECT_META = {
@@ -50,12 +55,30 @@ const TOTAL_MONTHS = 20;
 
 // 오늘 기준선: KST 오늘 → 타임라인 위치(개월 분수). M0 = 2026-05 기준.
 // 프로젝트 기간(0 ~ TOTAL_MONTHS) 밖이면 가장자리로 클램프.
-const TODAY_INDEX = (() => {
-  const monthIdx   = (TODAY_KST.y - 2026) * 12 + (TODAY_KST.m - 5);
-  const daysInMon  = new Date(TODAY_KST.y, TODAY_KST.m, 0).getDate();
-  const idx        = monthIdx + TODAY_KST.d / daysInMon;
+function todayIndex(kst) {
+  const monthIdx   = (kst.y - 2026) * 12 + (kst.m - 5);
+  const daysInMon  = new Date(kst.y, kst.m, 0).getDate();
+  const idx        = monthIdx + kst.d / daysInMon;
   return Math.max(0, Math.min(TOTAL_MONTHS, idx));
-})();
+}
+
+function computeTodayState(date) {
+  const kst = kstToday(date);
+  return {
+    kst,
+    label: kstLabel(kst),
+    index: todayIndex(kst),
+  };
+}
+
+function refreshProjectToday(date) {
+  const today = computeTodayState(date);
+  PROJECT_META.todayLabel = today.label;
+  if (window.PROJECT_DATA) window.PROJECT_DATA.TODAY_INDEX = today.index;
+  return today;
+}
+
+const TODAY_INDEX = todayIndex(TODAY_KST);
 
 // ─── 단계 유형 ──────────────────────────────────────────────────────────────
 const PHASE_TYPES = {
@@ -312,4 +335,5 @@ window.PROJECT_DATA = {
   CATEGORIES, STATUSES, PRIORITIES, PHASE_OPTIONS,
   STATUS_STYLE, PRIORITY_STYLE, CATEGORY_STYLE,
   SEED_ITEMS,
+  refreshToday: refreshProjectToday,
 };
