@@ -104,10 +104,30 @@
     bar.style.background = pt.color;
     bar.style.color      = pt.text;
     bar.setAttribute('title', phase.label);
+
+    const todayIdx = P().TODAY_INDEX;
+    let progress = phase.progress != null
+      ? phase.progress
+      : todayIdx >= phase.start + phase.dur
+        ? 100
+        : todayIdx > phase.start
+          ? Math.round((todayIdx - phase.start) / phase.dur * 100)
+          : null;
+
+    if (progress != null && progress < 100) {
+      const unfill = div('g-bar-unfill');
+      unfill.style.width = (100 - progress) + '%';
+      bar.appendChild(unfill);
+    }
     if (phase.dur >= 1) {
       const label = span('g-bar-label');
       label.textContent = phase.label;
       bar.appendChild(label);
+    }
+    if (progress != null && progress < 100) {
+      const badge = div('g-bar-progress-badge');
+      badge.textContent = progress + '%';
+      bar.appendChild(badge);
     }
     return bar;
   }
@@ -121,7 +141,7 @@
 
     const lbl = div('g-ms-label' + (isStar ? ' g-ms-label--star' : ''));
     lbl.textContent = ms.label;
-    if (nearEnd) lbl.classList.add('g-ms-label--end');
+    if (nearEnd) wrap.classList.add('g-ms--end');
     wrap.appendChild(lbl);
 
     const diamond = div('g-ms-diamond' + (isStar ? ' g-ms-diamond--star' : ''));
@@ -202,23 +222,25 @@
   // ── Task row ──────────────────────────────────────────────────────────────────
   function buildTaskRow(taskGroup, rowData, isFirst, rowIndex) {
     const row = div('g-row g-row--task' + (rowIndex % 2 === 1 ? ' g-row--alt' : ''));
+    row.dataset.taskGroup = taskGroup.id;
     if (isFirst) row.dataset.taskId = taskGroup.id;
 
     const lc = div('g-label-col');
     if (taskGroup.rows.length === 1) {
       const lbl = div('g-label g-label--full');
-      const name = span('g-label-name');
+      const name = span('g-label-name' + (taskGroup.rows[0].own ? ' g-own' : ''));
       name.textContent = taskGroup.group;
       lbl.appendChild(name);
       if (taskGroup.badges && taskGroup.badges.length) {
         const badges = div('g-label-badges');
         taskGroup.badges.forEach((t, bi) => {
-          const c = BADGE_COLORS[bi % BADGE_COLORS.length];
+          const c = t === 'B2B' ? '#FF3B3B' : BADGE_COLORS[bi % BADGE_COLORS.length];
           const badge = span('g-label-badge');
           badge.textContent = t;
           badge.style.color       = c;
-          badge.style.background   = hexA(c, 0.14);
-          badge.style.borderColor  = hexA(c, 0.42);
+          badge.style.background   = hexA(c, t === 'B2B' ? 0.18 : 0.14);
+          badge.style.borderColor  = hexA(c, t === 'B2B' ? 0.55 : 0.42);
+          if (t === 'B2B') badge.style.fontWeight = '800';
           badges.appendChild(badge);
         });
         lbl.appendChild(badges);
@@ -240,25 +262,12 @@
   // ── Legend ────────────────────────────────────────────────────────────────────
   function buildLegend() {
     const wrap = div('g-legend');
-    const phases = div('g-legend-phases');
-    P().PHASE_ORDER.forEach(key => {
-      const pt = P().PHASE_TYPES[key];
-      const item = div('g-legend-item');
-      const dot = span('g-legend-dot');
-      dot.style.background = pt.color;
-      if (key === '사전준비') dot.style.border = '1.5px solid #C8C3B4';
-      const lbl = span('g-legend-label');
-      lbl.textContent = key;
-      item.appendChild(dot);
-      item.appendChild(lbl);
-      phases.appendChild(item);
-    });
-    wrap.appendChild(phases);
 
     const todayItem = div('g-legend-today');
     const line = span('g-legend-today-line');
     const lbl = span('g-legend-label');
-    lbl.textContent = '기준일 ' + P().META.todayLabel + ' ' + koWeekday(P().META.todayLabel);
+    const now = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+    lbl.textContent = '기준일 ' + P().META.todayLabel + ' ' + koWeekday(P().META.todayLabel) + ' ' + now;
     todayItem.appendChild(line);
     todayItem.appendChild(lbl);
     wrap.appendChild(todayItem);
@@ -294,6 +303,30 @@
     _ro.observe(container);
   }
 
+  // ── Group block (멀티행 그룹: 과제명 rowspan) ────────────────────────────────
+  function buildGroupBlock(group, rowIndex) {
+    const block = div('g-group-block');
+    block.dataset.taskGroup = group.id;
+    block.dataset.taskId    = group.id;
+
+    const nameCol = div('g-group-name-col');
+    nameCol.textContent = group.group;
+    block.appendChild(nameCol);
+
+    const rowsCol = div('g-group-rows-col');
+    group.rows.forEach((rowData, ri) => {
+      const row = div('g-sub-row g-row--task' + ((rowIndex + ri) % 2 === 1 ? ' g-row--alt' : ''));
+      row.dataset.taskGroup = group.id;
+      const subLabel = div('g-sub-label' + (rowData.own ? ' g-own' : ''));
+      subLabel.textContent = rowData.name;
+      row.appendChild(subLabel);
+      row.appendChild(buildTimeline(rowData.phases, false, null));
+      rowsCol.appendChild(row);
+    });
+    block.appendChild(rowsCol);
+    return block;
+  }
+
   // ── Main render ───────────────────────────────────────────────────────────────
   function renderGantt(container) {
     container.innerHTML = '';
@@ -302,14 +335,16 @@
     const chart = div('g-chart');
     chart.appendChild(buildMonthHeader());
     chart.appendChild(buildMilestoneRow());
-    chart.appendChild(buildSummaryRow());
 
     let rowIndex = 0;
     P().TASKS.forEach(group => {
-      group.rows.forEach((row, ri) => {
-        chart.appendChild(buildTaskRow(group, row, ri === 0, rowIndex));
+      if (group.rows.length === 1) {
+        chart.appendChild(buildTaskRow(group, group.rows[0], true, rowIndex));
         rowIndex++;
-      });
+      } else {
+        chart.appendChild(buildGroupBlock(group, rowIndex));
+        rowIndex += group.rows.length;
+      }
     });
     container.appendChild(chart);
 

@@ -338,7 +338,6 @@
 
   // ── Export CSV ────────────────────────────────────────────────────────────────
   function exportCSV(items) {
-    const cols = ['id','category','title','content','taskId','phase','status','priority','updatedAt'];
     const header = ['구분','분류','제목','내용','관련 과제','관련 단계','상태','중요도','최종수정일'];
     const rows = items.map(it => [
       it.id, it.category, it.title, it.content,
@@ -474,9 +473,18 @@
 
     overlay.appendChild(dialog);
 
-    // Close on backdrop
-    overlay.addEventListener('mousedown', e => {
-      if (e.target === overlay) closeModal();
+    // Focus trap — Tab/Shift+Tab 키가 모달 외부로 빠져나가지 않도록 잠금
+    const _focusable = dialog.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+    );
+    const _firstEl = _focusable[0];
+    const _lastEl  = _focusable[_focusable.length - 1];
+    dialog.addEventListener('keydown', function (e) {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey ? document.activeElement === _firstEl : document.activeElement === _lastEl) {
+        e.preventDefault();
+        (e.shiftKey ? _lastEl : _firstEl).focus();
+      }
     });
 
     // Focus title
@@ -490,14 +498,14 @@
   }
 
   function handleSave(form) {
-    // 저장 시각은 한국 시간(KST) 기준 날짜 — UTC(toISOString)는 밤 시간대에 하루 어긋남
     const today = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
-    }).format(new Date()); // 'YYYY-MM-DD'
-    if (form._isNew) {
-      _onAdd({ ...form, id: 'it-' + Date.now(), updatedAt: today });
+    }).format(new Date());
+    const { _isNew, ...data } = form;
+    if (_isNew) {
+      _onAdd({ ...data, id: 'it-' + Date.now(), updatedAt: today });
     } else {
-      _onUpdate({ ...form, updatedAt: today });
+      _onUpdate({ ...data, updatedAt: today });
     }
     closeModal();
   }
@@ -580,6 +588,7 @@
         const cs = P().CATEGORY_STYLE[item.category];
         const ri = div('recent-item');
         ri.addEventListener('click', () => {
+          _currentSideId = item.id;
           document.dispatchEvent(new CustomEvent('app:switch-tab', { detail: 'items' }));
         });
         const main = div('recent-item-main');
@@ -693,9 +702,9 @@
     filters.appendChild(layoutToggle);
 
     // Reset demo
-    const resetBtn = btn('btn-reset-demo', '예시 데이터로 초기화');
+    const resetBtn = btn('btn-reset-demo', '전체 초기화');
     resetBtn.addEventListener('click', () => {
-      if (confirm('등록한 주요사항을 모두 초기화하고 기본 예시로 되돌립니다.\n계속하시겠습니까?')) {
+      if (confirm('등록한 주요사항을 모두 삭제합니다.\n계속하시겠습니까?')) {
         document.dispatchEvent(new CustomEvent('items:reset'));
       }
     });
@@ -724,4 +733,8 @@
   window.renderItems     = renderItems;
   window.renderDashboard = renderDashboard;
   window.openItemModal   = (item, isNew) => openModal(item, isNew);
+
+  // 배경(backdrop) 클릭 닫기 — 매 openModal 호출마다 추가되지 않도록 모듈 초기화 시 1회만 등록
+  document.getElementById('modal-overlay')
+    .addEventListener('mousedown', e => { if (e.target === e.currentTarget) closeModal(); });
 })();

@@ -12,48 +12,44 @@
 
   <!-- ══ App Header ══════════════════════════════════════════════════════════ -->
   <header class="app-header">
-    <div class="header-top">
+    <div class="header-row">
+      <nav class="tab-nav" role="tablist">
+        <button class="tab-btn" data-tab="gantt" id="tab-gantt" role="tab" aria-selected="true" aria-controls="panel-gantt">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          구축일정
+        </button>
+        <button class="tab-btn" data-tab="dashboard" id="tab-dashboard" role="tab" aria-selected="false" aria-controls="panel-dashboard">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+          대시보드
+        </button>
+        <button class="tab-btn" data-tab="items" id="tab-items" role="tab" aria-selected="false" aria-controls="panel-items">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          주요사항 관리
+          <span class="tab-badge" id="items-count-badge">0</span>
+        </button>
+      </nav>
       <div class="header-brand">
-        <div class="brand-logo">KB</div>
         <div class="brand-text">
           <h1 class="brand-title" id="brand-title">여신IT개발부 코어뱅킹 현대화 2단계 프로젝트</h1>
-          <span class="brand-sep">·</span>
-          <span class="brand-sub" id="brand-sub"></span>
         </div>
       </div>
+      <div class="header-progress" id="header-progress"></div>
     </div>
-
-    <!-- Tab nav -->
-    <nav class="tab-nav" role="tablist">
-      <button class="tab-btn" data-tab="dashboard" id="tab-dashboard" role="tab" aria-selected="false" aria-controls="panel-dashboard">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
-        </svg>
-        대시보드
-      </button>
-      <button class="tab-btn" data-tab="gantt" id="tab-gantt" role="tab" aria-selected="true" aria-controls="panel-gantt">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-          <line x1="8" y1="18" x2="21" y2="18"/>
-          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
-          <line x1="3" y1="18" x2="3.01" y2="18"/>
-        </svg>
-        간트차트
-      </button>
-      <button class="tab-btn" data-tab="items" id="tab-items" role="tab" aria-selected="false" aria-controls="panel-items">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="12" y1="8" x2="12" y2="12"/>
-          <line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        주요사항 관리
-        <span class="tab-badge" id="items-count-badge">0</span>
-      </button>
-    </nav>
   </header>
 
   <!-- ══ Main content ══════════════════════════════════════════════════════════ -->

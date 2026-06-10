@@ -85,9 +85,36 @@
     } else {
       titleEl.textContent = M.title;
     }
-    document.getElementById('brand-sub').textContent   = M.subtitle + ' · ' + M.period;
     const badge = document.getElementById('items-count-badge');
     if (badge) badge.textContent = state.items.length;
+
+    renderHeaderProgress();
+  }
+
+  function renderHeaderProgress() {
+    const el = document.getElementById('header-progress');
+    if (!el) return;
+    const today  = window.PROJECT_DATA.TODAY_INDEX;
+    const openMs = window.PROJECT_DATA.MILESTONES.find(m => m.id === 'ms-open');
+    const total  = openMs ? openMs.index : window.PROJECT_DATA.TOTAL_MONTHS;
+    const pct    = Math.min(100, Math.round(today / total * 100));
+    const done   = Math.floor(today);
+    const r      = 17;
+    const circ   = 2 * Math.PI * r;
+    const arc    = circ * pct / 100;
+    el.innerHTML =
+      `<div class="hprog-ring-wrap">` +
+        `<svg class="hprog-ring" viewBox="0 0 44 44" aria-hidden="true">` +
+          `<circle class="hprog-ring-bg"   cx="22" cy="22" r="${r}"/>` +
+          `<circle class="hprog-ring-fill" cx="22" cy="22" r="${r}"` +
+            ` stroke-dasharray="${arc.toFixed(2)} ${(circ - arc).toFixed(2)}"/>` +
+        `</svg>` +
+        `<span class="hprog-pct">${pct}%</span>` +
+      `</div>` +
+      `<div class="hprog-info">` +
+        `<span class="hprog-label">전체 진행률</span>` +
+        `<span class="hprog-detail">${done}개월 / ${Math.round(total)}개월</span>` +
+      `</div>`;
   }
 
   function renderTab() {
@@ -109,7 +136,7 @@
       renderDashboard(document.getElementById('panel-dashboard'), state.items);
     } else if (state.tab === 'gantt') {
       const container = document.getElementById('gantt-container');
-      if (container) renderGantt(container);
+      if (container && !container.hasChildNodes()) renderGantt(container);
     } else if (state.tab === 'items') {
       renderItemsTab();
     }

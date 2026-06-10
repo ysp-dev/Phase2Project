@@ -25,7 +25,7 @@
       background: #2a2a2a; color: #ddd; border: 1px solid #444; border-radius: 6px;
       padding: 5px 8px; font: 500 13px system-ui; min-width: 240px;
     }
-    #bar:hover, body:hover > #bar { opacity: 1; pointer-events: auto; }
+    #bar.visible { opacity: 1; pointer-events: auto; }
     #bar .name { color: #FFBC00; }
     #bar button {
       background: #2a2a2a; color: #ddd; border: 1px solid #444; border-radius: 6px;
@@ -34,6 +34,10 @@
     #bar button:hover { background: #383838; }
     #bar .spacer { margin-left: auto; }
     #count { color: #888; }
+    /* iframe 위에 항상 떠있는 상단 트리거 띠 */
+    #trigger {
+      position: fixed; top: 0; left: 0; right: 0; height: 10px; z-index: 11;
+    }
   </style>
 </head>
 <body>
@@ -47,6 +51,7 @@
   </script>
   <!-- ▲▲▲ -->
 
+  <div id="trigger"></div>
   <div id="bar">
     현재: <span class="name" id="now">—</span>
     <span id="count"></span>
@@ -65,15 +70,20 @@
   </div>
 
   <script>
-    // 주소는 위 SITES 배열에 박아둔 값을 항상 사용 (복사·새로고침해도 그대로).
-    // 입력란은 현장에서 잠깐 바꿔보는 용도이며 저장하지 않음.
-
     // URL에서 표시용 이름 도출 (없으면 host:port)
     function labelFor(s) {
       if (s.name) return s.name;
       try { const u = new URL(s.url); return u.host + u.pathname.replace(/\/$/, ''); }
       catch (e) { return s.url; }
     }
+
+    // localStorage 저장값 복원 (iframe 생성 전에 SITES 배열에 반영)
+    [0, 1].forEach(i => {
+      const saved = localStorage.getItem('rotator_url' + i);
+      if (saved) { SITES[i].url = saved; SITES[i].name = null; }
+    });
+    const savedInterval = parseInt(localStorage.getItem('rotator_interval'), 10);
+    if (savedInterval >= 1) { INTERVAL_SEC = savedInterval; }
 
     // iframe 생성
     const frames = SITES.map((s, i) => {
@@ -86,6 +96,8 @@
     });
 
     let cur = 0, paused = false, remain = INTERVAL_SEC;
+    let scheduledPauseUntil = 0;  // epoch ms; 0 = 예약중지 없음
+    let _lastTriggerKey = '';     // 같은 시간대 중복 발동 방지
     const nowEl = document.getElementById('now');
     const countEl = document.getElementById('count');
 
@@ -95,7 +107,29 @@
       nowEl.textContent = labelFor(SITES[cur]);
       remain = INTERVAL_SEC;
     }
+
+    // 매일 09:00, 15:00 — 사이트2 고정 후 5분간 로테이션 중지
+    const SCHEDULE_HOURS = [9, 15];
+    const SCHEDULE_PAUSE_SEC = 5 * 60;
+    function checkSchedule() {
+      const now = new Date();
+      const h = now.getHours(), m = now.getMinutes();
+      if (!SCHEDULE_HOURS.includes(h) || m !== 0) return;
+      const key = now.toDateString() + '-' + h;  // 하루+시간 단위 중복 방지
+      if (key === _lastTriggerKey) return;
+      _lastTriggerKey = key;
+      show(1);  // 사이트2(index 1)로 전환
+      scheduledPauseUntil = Date.now() + SCHEDULE_PAUSE_SEC * 1000;
+    }
+
     function tick() {
+      checkSchedule();
+      const inSchedule = Date.now() < scheduledPauseUntil;
+      if (inSchedule) {
+        const secs = Math.ceil((scheduledPauseUntil - Date.now()) / 1000);
+        countEl.textContent = '⏰ 예약중지 · ' + secs + 's 후 재생';
+        return;
+      }
       if (paused) { countEl.textContent = '(일시정지)'; return; }
       remain--;
       countEl.textContent = '· ' + remain + 's 후 전환';
@@ -105,7 +139,7 @@
     show(0);
     setInterval(tick, 1000);
 
-    // URL 입력 — 현 세션에만 즉시 반영(저장 안 함). 영구 변경은 위 SITES 배열을 수정.
+    // URL 입력 — 즉시 반영 + localStorage 저장
     [0, 1].forEach(i => {
       const inp = document.getElementById('url' + i);
       inp.value = SITES[i].url;
@@ -113,18 +147,19 @@
         const v = inp.value.trim();
         if (!v) { inp.value = SITES[i].url; return; }
         SITES[i].url = v;
-        SITES[i].name = null;            // 이름은 URL에서 다시 도출
-        frames[i].src = v;               // 해당 iframe 새 주소로 로드
+        SITES[i].name = null;
+        frames[i].src = v;
+        localStorage.setItem('rotator_url' + i, v);
         if (i === cur) nowEl.textContent = labelFor(SITES[i]);
       });
     });
 
-    // 간격 입력 — 즉시 반영
+    // 간격 입력 — 즉시 반영 + localStorage 저장
     const intervalEl = document.getElementById('interval');
     intervalEl.value = INTERVAL_SEC;
     intervalEl.addEventListener('change', () => {
       const v = parseInt(intervalEl.value, 10);
-      if (v >= 1) { INTERVAL_SEC = v; remain = v; }
+      if (v >= 1) { INTERVAL_SEC = v; remain = v; localStorage.setItem('rotator_interval', v); }
       else intervalEl.value = INTERVAL_SEC;
     });
 
@@ -138,6 +173,16 @@
       if (!document.fullscreenElement) document.documentElement.requestFullscreen();
       else document.exitFullscreen();
     };
+    // 트리거 띠에 진입 시 bar 표시, bar에서 벗어나면 300ms 후 숨김
+    const bar = document.getElementById('bar');
+    const trigger = document.getElementById('trigger');
+    let hideTimer;
+    function showBar() { clearTimeout(hideTimer); bar.classList.add('visible'); }
+    function scheduleHide() { clearTimeout(hideTimer); hideTimer = setTimeout(() => bar.classList.remove('visible'), 300); }
+    trigger.addEventListener('mouseenter', showBar);
+    bar.addEventListener('mouseenter', showBar);
+    bar.addEventListener('mouseleave', scheduleHide);
+
     // 키보드: ←/→ 전환, Space 일시정지, F 전체화면
     document.addEventListener('keydown', e => {
       if (e.key === 'ArrowRight') show(cur + 1);
