@@ -68,15 +68,16 @@
   }
 
   // ── 요약(전체 단계) 행 전용 옐로우톤 팔레트 ───────────────────────────────────
-  // 단계가 진행될수록 밝은 노랑 → 짙은 골드/앰버로 짙어지는 단색 그라데이션
+  // 단계가 진행될수록 밝은 노랑 → 진한 골드로 짙어지는 차분한 그라데이션
   const SUMMARY_COLORS = {
-    '사전준비': { color: '#FFF1B8', text: '#5A4A00' }, // 연노랑
-    '분석':     { color: '#FFDD33', text: '#3A2E00' }, // 노랑
-    '설계':     { color: '#FFC107', text: '#3A2A00' }, // 진노랑
-    '개발':     { color: '#F5A300', text: '#3A2600' }, // 앰버
-    '테스트':   { color: '#E08700', text: '#FFFFFF' }, // 골드
-    '이행':     { color: '#C77400', text: '#FFFFFF' }, // 진골드
-    '안정화':   { color: '#9E5E00', text: '#FFE6B0' }, // 다크앰버
+    '사전준비': { color: '#FFF8C7', text: '#4A3A00' },
+    '사전분석': { color: '#FFEE8A', text: '#4A3600' },
+    '분석':     { color: '#FFE05A', text: '#443000' },
+    '설계':     { color: '#FFD02E', text: '#3A2A00' },
+    '개발':     { color: '#F6BC16', text: '#322400' },
+    '테스트':   { color: '#E3A406', text: '#2A1E00' },
+    '이행':     { color: '#C88C00', text: '#241900' },
+    '안정화':   { color: '#AD7600', text: '#1F1600' },
   };
 
   function buildSummaryBar(phase) {
@@ -114,10 +115,11 @@
           ? Math.round((todayIdx - phase.start) / phase.dur * 100)
           : null;
 
-    if (progress != null && progress < 100) {
-      const unfill = div('g-bar-unfill');
-      unfill.style.width = (100 - progress) + '%';
-      bar.appendChild(unfill);
+    if (progress != null && progress > 0) {
+      const elapsed = div('g-bar-elapsed');
+      if (progress >= 100) elapsed.classList.add('g-bar-elapsed--complete');
+      elapsed.style.width = progress + '%';
+      bar.appendChild(elapsed);
     }
     if (phase.dur >= 1) {
       const label = span('g-bar-label');

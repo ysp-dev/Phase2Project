@@ -413,16 +413,21 @@ input, select, textarea { font-family: inherit; }
   position: absolute; top: var(--g-bar-top); bottom: var(--g-bar-top);
   display: flex; align-items: center; justify-content: center;
   overflow: hidden; box-sizing: border-box; border-radius: 7px;
+  border: 1px solid rgba(58,42,0,.24);
   container-type: inline-size;
-  box-shadow: 0 2px 6px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.14);
+  box-shadow: 0 2px 6px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.24);
   transition: filter .14s, transform .14s; cursor: default;
 }
 .g-bar:hover { filter: brightness(1.08); transform: translateY(-1px); }
 .g-bar-label { position: relative; z-index: 1; }
-.g-bar-unfill {
-  position: absolute; top: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,.32); border-radius: 0 7px 7px 0;
+.g-bar-elapsed {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,.24), rgba(0,0,0,.14));
+  border-radius: 7px 0 0 7px;
   pointer-events: none;
+}
+.g-bar-elapsed--complete {
+  border-radius: 7px;
 }
 .g-bar-progress-badge {
   position: absolute; top: 50%; right: 6px; transform: translateY(-50%); z-index: 2;
@@ -431,11 +436,11 @@ input, select, textarea { font-family: inherit; }
   background: rgba(0,0,0,.38); color: rgba(255,255,255,.92);
 }
 .g-bar--prep .g-bar-progress-badge {
-  background: rgba(255,255,255,.12); color: rgba(255,255,255,.7);
+  background: rgba(74,58,0,.16); color: #4A3A00;
 }
 .g-bar--prep {
-  background: #2A2822 !important; border: 1.5px solid #3A3830;
-  box-shadow: none;
+  border-color: rgba(74,58,0,.18);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.42), 0 2px 6px rgba(0,0,0,.22);
 }
 
 .g-row--task .g-bar { top: 24px; bottom: 24px; }

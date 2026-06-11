@@ -82,14 +82,14 @@ const TODAY_INDEX = todayIndex(TODAY_KST);
 
 // ─── 단계 유형 ──────────────────────────────────────────────────────────────
 const PHASE_TYPES = {
-  '사전준비': { color: '#EDE3CC', text: '#5A4530' },
-  '사전분석': { color: '#FFCF1F', text: '#3A2E00' },
-  '분석':     { color: '#FFCF1F', text: '#3A2E00' },
-  '설계':     { color: '#F59800', text: '#3A2500' },
-  '개발':     { color: '#F46600', text: '#FFFFFF' },
-  '테스트':   { color: '#C25000', text: '#FFFFFF' },
-  '이행':     { color: '#8E3A00', text: '#FFD098' },
-  '안정화':   { color: '#703200', text: '#FFB870' },
+  '사전준비': { color: '#FFF8C7', text: '#4A3A00' },
+  '사전분석': { color: '#FFEE8A', text: '#4A3600' },
+  '분석':     { color: '#FFE05A', text: '#443000' },
+  '설계':     { color: '#FFD02E', text: '#3A2A00' },
+  '개발':     { color: '#F6BC16', text: '#322400' },
+  '테스트':   { color: '#E3A406', text: '#2A1E00' },
+  '이행':     { color: '#C88C00', text: '#241900' },
+  '안정화':   { color: '#AD7600', text: '#1F1600' },
 };
 const PHASE_ORDER = ['사전준비','사전분석','분석','설계','개발','테스트','이행','안정화'];
 
