@@ -102,7 +102,7 @@ function ph(type, label, start, dur, progress) {
 
 // ─── 마일스톤 ────────────────────────────────────────────────────────────────
 const MILESTONES = [
-  { id: 'ms-kickoff', label: '착수보고',      kind: 'diamond', index: 2.0  },
+  { id: 'ms-kickoff', label: '착수보고(7.13)', kind: 'diamond', index: 2.42 },
   { id: 'ms-interim', label: '중간보고',      kind: 'diamond', index: 8.0  },
   { id: 'ms-open',    label: '오픈(10.12)',  kind: 'star',    index: 17.4 },
   { id: 'ms-close',   label: '종료보고',      kind: 'diamond', index: 19.5 },
